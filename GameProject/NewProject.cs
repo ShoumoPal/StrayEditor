@@ -1,6 +1,7 @@
 ﻿using StrayEditor.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.Serialization;
@@ -53,22 +54,20 @@ namespace StrayEditor.GameProject
             }
         }
 
+        private ObservableCollection<ProjectTemplate> projectTemplates = new();
+        public ReadOnlyObservableCollection<ProjectTemplate> ProjectTemplates { get; }
+
         public NewProject()
         {
+            ProjectTemplates = new(projectTemplates);
             try
             {
                 var templateFiles = Directory.GetFiles(_templatePath, "template.xml", searchOption: SearchOption.AllDirectories);
                 Debug.Assert(templateFiles.Any());
                 foreach (var file in templateFiles)
                 {
-                    var template = new ProjectTemplate()
-                    {
-                        ProjectType = "Empty Project",
-                        ProjectFile = "project.stray",
-                        Folders = new List<string> { ".Stray", "Content", "GameCode" }
-                    };
-
-                    Serializer.ToFile(template, file);
+                    var template = Serializer.FromFile<ProjectTemplate>(file);
+                    projectTemplates.Add(template);
                 }
             }
             catch (Exception e)

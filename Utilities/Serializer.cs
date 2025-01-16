@@ -25,5 +25,21 @@ namespace StrayEditor.Utilities
 				// log error
 			}
         }
+		public static T FromFile<T>(string path)
+		{
+            try
+            {
+                using var fs = new FileStream(path, FileMode.Open);
+                var serializer = new DataContractSerializer(typeof(T));
+                T instance = (T)serializer.ReadObject(fs);
+                return instance;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                // log error
+                return default(T);
+            }
+        } 
     }
 }
