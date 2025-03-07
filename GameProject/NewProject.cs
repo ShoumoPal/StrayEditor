@@ -14,20 +14,20 @@ namespace StrayEditor.GameProject
     public class ProjectTemplate
     {
         [DataMember]
-        public string ProjectType { get; set; }
+        public string? ProjectType { get; set; }
         [DataMember]
-        public string ProjectFile { get; set; }
+        public string? ProjectFile { get; set; }
         [DataMember]
-        public List<string> Folders { get; set; }
-        public byte[] Icon { get; set; }
+        public List<string>? Folders { get; set; }
+        public byte[]? Icon { get; set; }
 
-        public byte[] Screenshot { get; set; }
+        public byte[]? Screenshot { get; set; }
 
-        public string IconFilePath { get; set; }
+        public string? IconFilePath { get; set; }
 
-        public string ScreenShotFilePath { get; set; }
+        public string? ScreenShotFilePath { get; set; }
 
-        public string  ProjectFilePath { get; set; }
+        public string?  ProjectFilePath { get; set; }
     }
     class NewProject : ViewModelBase
     {
@@ -49,7 +49,7 @@ namespace StrayEditor.GameProject
             }
         }
 
-        private string _projectPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\StrayProject\";
+        private string _projectPath = $@"{Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)}\StrayProjects\";
 
         public string ProjectPath
         {
@@ -132,6 +132,44 @@ namespace StrayEditor.GameProject
 
             return IsValid;
         }
+
+        public string CreateProject(ProjectTemplate template)
+        {
+            ValidateProjectPath();
+            if (!IsValid)
+            {
+                return string.Empty;
+            }
+
+            if (!Path.EndsInDirectorySeparator(ProjectPath)) ProjectPath += @"\";
+            var path = $@"{ProjectPath}{ProjectName}\";
+
+            try
+            {
+                if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+                foreach (var folder in template.Folders)
+                {
+                    Directory.CreateDirectory(Path.GetFullPath(Path.Combine(Path.GetDirectoryName(path), folder)));
+                }
+                var dirInfo = new DirectoryInfo(path + @".Stray\");
+                dirInfo.Attributes |= FileAttributes.Hidden;
+                File.Copy(template.IconFilePath, Path.GetFullPath(Path.Combine(dirInfo.FullName, "Icon.png")));
+                File.Copy(template.IconFilePath, Path.GetFullPath(Path.Combine(dirInfo.FullName, "Screenshot.png")));
+
+                var projectXml = File.ReadAllText(template.ProjectFilePath);
+                projectXml = string.Format(projectXml, ProjectName, ProjectPath);
+                var projectPath = Path.GetFullPath(Path.Combine(path, $"{ProjectName}{Project.Extension}"));
+                File.WriteAllText(projectPath, projectXml);
+                return path;
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+
+                return string.Empty;
+            }
+        }
+
         public NewProject()
         {
             ProjectTemplates = new(projectTemplates);
