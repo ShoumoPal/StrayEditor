@@ -1,4 +1,5 @@
 ﻿using StrayEditor.GameProject;
+using System.ComponentModel;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
@@ -21,6 +22,13 @@ namespace StrayEditor
         {
             InitializeComponent();
             Loaded += OnMainWindowLoaded;
+            Closing += OnMainWindowClosing;
+        }
+
+        private void OnMainWindowClosing(object? sender, CancelEventArgs e)
+        {
+            Closing -= OnMainWindowClosing;
+            Project.Current?.UnLoad();
         }
 
         private void OnMainWindowLoaded(object sender, RoutedEventArgs e)
@@ -32,13 +40,14 @@ namespace StrayEditor
         private void OpenProjectBrowser()
         {
             ProjectBrowser projectBrowser = new();
-            if(projectBrowser.ShowDialog() == false)
+            if(projectBrowser.ShowDialog() == false || projectBrowser.DataContext == null)
             {
                 Application.Current.Shutdown();
             }
             else
             {
-
+                Project.Current?.UnLoad();
+                DataContext = projectBrowser.DataContext;
             }
         }
     }

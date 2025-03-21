@@ -154,12 +154,12 @@ namespace StrayEditor.GameProject
                 var dirInfo = new DirectoryInfo(path + @".Stray\");
                 dirInfo.Attributes |= FileAttributes.Hidden;
                 File.Copy(template.IconFilePath, Path.GetFullPath(Path.Combine(dirInfo.FullName, "Icon.png")));
-                File.Copy(template.IconFilePath, Path.GetFullPath(Path.Combine(dirInfo.FullName, "Screenshot.png")));
+                File.Copy(template.ScreenShotFilePath, Path.GetFullPath(Path.Combine(dirInfo.FullName, "Screenshot.png")));
 
                 var projectXml = File.ReadAllText(template.ProjectFilePath);
                 projectXml = string.Format(projectXml, ProjectName, ProjectPath);
                 var projectPath = Path.GetFullPath(Path.Combine(path, $"{ProjectName}{Project.Extension}"));
-                File.WriteAllText(projectPath, projectXml);
+                File.WriteAllText(projectPath, projectXml); 
                 return path;
             }
             catch (Exception e)
